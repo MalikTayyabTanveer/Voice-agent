@@ -38,8 +38,8 @@ os.environ['OUTLINES_CACHE_DIR'] = '/tmp/.outlines'
 deepgram_voice: str = "aura-asteria-en"
 
 # Manually set API keys
-openai_api_key = "your_openai_api_key_here"
-daily_api_key = "your_daily_api_key_here"
+openai_api_key = "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"
+daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d77"
 
 # Run vllM Server in background process
 def start_server():
