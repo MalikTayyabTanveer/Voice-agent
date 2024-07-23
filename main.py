@@ -27,8 +27,6 @@ from helpers import (
     AudioVolumeTimer,
     TranscriptionTimingLogger
 )
-from cerebrium import get_secret
-from huggingface_hub import login
 
 logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
@@ -39,18 +37,20 @@ os.environ['OUTLINES_CACHE_DIR'] = '/tmp/.outlines'
 
 deepgram_voice: str = "aura-asteria-en"
 
-login(token=get_secret('sec_1'))
+# Manually set API keys
+openai_api_key = "your_openai_api_key_here"
+daily_api_key = "your_daily_api_key_here"
+
 # Run vllM Server in background process
 def start_server():
     while True:
         process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model NousResearch/Meta-Llama-3-8B-Instruct --dtype bfloat16 --api-key {get_secret('sec_1')}",
+            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model NousResearch/Meta-Llama-3-8B-Instruct --dtype bfloat16 --api-key {openai_api_key}",
             shell=True
         )
         process.wait()  # Wait for the process to complete
         logger.error("Server process ended unexpectedly. Restarting in 5 seconds...")
         time.sleep(7)  # Wait before restarting
-
 
 # Start the server in a separate process
 server_process = Process(target=start_server, daemon=True)
@@ -90,7 +90,7 @@ async def main(room_url: str, token: str):
 
         llm = OpenAILLMService(
             name="LLM",
-            api_key=get_secret("sec_1"),
+            api_key=openai_api_key,
             model="NousResearch/Meta-Llama-3-8B-Instruct",
             base_url="http://127.0.0.1:5000/v1"
         )
@@ -156,7 +156,7 @@ async def main(room_url: str, token: str):
 def check_vllm_model_status():
     url = "http://127.0.0.1:5000/v1/models"
     headers = {
-        "Authorization": f"Bearer {get_secret('sec_1')}"
+        "Authorization": f"Bearer {openai_api_key}"
     }
     max_retries = 8
     for _ in range(max_retries):
@@ -185,7 +185,7 @@ def create_room():
     url = "https://api.daily.co/v1/rooms/"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {get_secret('DAILY_T')}"
+        "Authorization": f"Bearer {daily_api_key}"
     }
     data = {
         "properties": {
@@ -216,7 +216,7 @@ def create_token(room_name: str):
     url = "https://api.daily.co/v1/meeting-tokens"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {get_secret('DAILY_T')}"
+        "Authorization": f"Bearer {daily_api_key}"
     }
     data = {
         "properties": {
@@ -231,4 +231,3 @@ def create_token(room_name: str):
     else:
         logger.error(f"Failed to create token: {response.status_code}")
         return None
-
