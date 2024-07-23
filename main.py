@@ -1,3 +1,5 @@
+import aiohttp_cors
+from aiohttp import web
 import aiohttp
 import os
 import sys
@@ -231,3 +233,25 @@ def create_token(room_name: str):
     else:
         logger.error(f"Failed to create token: {response.status_code}")
         return None
+
+
+app = web.Application()
+
+# Add your routes here
+app.router.add_post('/v1/voice_agent', handle_start_bot)
+
+# Configure default CORS settings.
+cors = aiohttp_cors.setup(app, defaults={
+    "*": aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*"
+    )
+})
+
+# Configure CORS on all routes.
+for route in list(app.router.routes()):
+    cors.add(route)
+
+# Run the application
+web.run_app(app, port=5000)
