@@ -234,6 +234,16 @@ def create_token(room_name: str):
         logger.error(f"Failed to create token: {response.status_code}")
         return None
 
+async def handle_create_room(request):
+    room_info = create_room()
+    return web.json_response(room_info)
+
+async def handle_start_bot(request):
+    request_data = await request.json()
+    room_url = request_data.get('room_url')
+    token = request_data.get('token')
+    start_bot(room_url, token)
+    return web.json_response({"message": "bot started"})
 
 app = web.Application()
 
