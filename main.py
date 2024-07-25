@@ -39,6 +39,11 @@ os.environ['OUTLINES_CACHE_DIR'] = '/tmp/.outlines'
 
 deepgram_voice: str = "aura-asteria-en"
 
+rope_scaling = {
+            'type': 'llama3',
+            'factor': 8.0
+            }
+
 # Manually set API keys
 openai_api_key = "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"
 daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d77"
@@ -89,10 +94,7 @@ async def main(room_url: str, token: str):
             voice=deepgram_voice,
             base_url="http://127.0.0.1:8082/v1/speak"
         )
-        rope_scaling = {
-            'type': 'llama3',
-            'factor': 8.0
-            }
+        
         llm = OpenAILLMService(
             name="LLM",
             api_key=openai_api_key,
