@@ -33,13 +33,11 @@ from helpers import (
 logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
-
 os.environ['SSL_CERT'] = ''
 os.environ['SSL_KEY'] = ''
 os.environ['OUTLINES_CACHE_DIR'] = '/tmp/.outlines'
 
 deepgram_voice: str = "aura-asteria-en"
-
 
 # Manually set API keys
 openai_api_key = "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"
@@ -96,7 +94,7 @@ async def main(room_url: str, token: str):
             name="LLM",
             api_key=openai_api_key,
             model="hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4",
-            base_url="http://127.0.0.1:5000/v1"
+            base_url="http://127.0.0.1:5000/v1"  # Ensure this matches your server's URL
         )
 
         messages = [
@@ -132,21 +130,19 @@ async def main(room_url: str, token: str):
                 report_only_initial_ttfb=True
             ))
 
-        # When the first participant joins, the bot should introduce itself.
         @transport.event_handler("on_first_participant_joined")
         async def on_first_participant_joined(transport, participant):
             # Kick off the conversation.
             time.sleep(1.5)
             messages.append(
-                {"role": "system", "content": "Introduce yourself by saying 'hello, I'm FastBot, how can I help you today?'"})
+                {"role": "system", "content": "Introduce yourself by saying 'hello, I'm FastBot, how can I help you today?'"}
+            )
             await task.queue_frame(LLMMessagesFrame(messages))
 
-        # When the participant leaves, we exit the bot.
         @transport.event_handler("on_participant_left")
         async def on_participant_left(transport, participant, reason):
             await task.queue_frame(EndFrame())
 
-        # If the call is ended make sure we quit as well.
         @transport.event_handler("on_call_state_updated")
         async def on_call_state_updated(transport, state):
             if state == "left":
