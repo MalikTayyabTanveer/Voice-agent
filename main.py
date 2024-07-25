@@ -7,7 +7,6 @@ import subprocess
 import time
 import requests
 import asyncio
-import json
 from multiprocessing import Process
 from loguru import logger
 
@@ -44,7 +43,6 @@ rope_scaling = {
             'type': 'llama3',
             'factor': 8.0
             }
-rope_scaling_json = json.dumps(rope_scaling)
 
 # Manually set API keys
 openai_api_key = "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"
@@ -54,7 +52,7 @@ daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d7
 def start_server():
     while True:
         process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4 --api-key {openai_api_key} --rope-scaling \'{rope_scaling_json}\'",
+            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4 --api-key {openai_api_key}",
             shell=True
         )
         process.wait()  # Wait for the process to complete
