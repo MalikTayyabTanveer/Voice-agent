@@ -97,7 +97,7 @@ async def main(room_url: str, token: str):
             name="LLM",
             api_key=openai_api_key,
             model="hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4",
-            base_url="http://127.0.0.1:5000/v1"
+            base_url="http://127.0.0.1:5000/v1",
             rope_scaling=rope_scaling
         )
 
