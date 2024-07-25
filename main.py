@@ -52,7 +52,7 @@ daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d7
 def start_server():
     while True:
         process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4 --api-key {openai_api_key}",
+            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model zweack/meta-llama-2-7b-chat-hf_4bit_quantized --api-key {openai_api_key}",
             shell=True
         )
         process.wait()  # Wait for the process to complete
@@ -98,9 +98,8 @@ async def main(room_url: str, token: str):
         llm = OpenAILLMService(
             name="LLM",
             api_key=openai_api_key,
-            model="hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4",
-            base_url="http://127.0.0.1:5000/v1",
-            max_tokens=128
+            model="zweack/meta-llama-2-7b-chat-hf_4bit_quantized",
+            base_url="http://127.0.0.1:5000/v1"
         )
 
         messages = [
