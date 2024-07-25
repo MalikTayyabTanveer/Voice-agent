@@ -89,12 +89,16 @@ async def main(room_url: str, token: str):
             voice=deepgram_voice,
             base_url="http://127.0.0.1:8082/v1/speak"
         )
-
+        rope_scaling = {
+            'type': 'llama3',
+            'factor': 8.0
+            }
         llm = OpenAILLMService(
             name="LLM",
             api_key=openai_api_key,
             model="hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4",
             base_url="http://127.0.0.1:5000/v1"
+            rope_scaling=rope_scaling
         )
 
         messages = [
