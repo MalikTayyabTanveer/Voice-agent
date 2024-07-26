@@ -44,7 +44,7 @@ openai_api_key = "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"
 daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d77"
 
 gpu_memory_utilization = 0.9  # Increase this value
-max_model_len = 5000
+max_model_len = 50000
 model_id = "hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4"
 model, tokenizer = load_model(model_id, gpu_memory_utilization=gpu_memory_utilization, max_model_len=max_model_len)
 0  
@@ -53,7 +53,7 @@ model, tokenizer = load_model(model_id, gpu_memory_utilization=gpu_memory_utiliz
 def start_server():
     while True:
         process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model_id} --api-key {openai_api_key}",
+            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model_id} --api-key {openai_api_key} --max-model-len {max_model_len}",
             shell=True
         )
         process.wait()  # Wait for the process to complete
