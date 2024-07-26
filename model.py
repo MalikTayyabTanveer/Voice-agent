@@ -2,7 +2,7 @@ from awq import AutoAWQForCausalLM
 from transformers import AutoTokenizer
 import torch
 
-def load_model(model_id="hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4", gpu_memory_utilization, max_model_len):
+def load_model(model_id="hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4", gpu_memory_utilization=0.9, max_model_len=5000):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     model = AutoAWQForCausalLM.from_pretrained(
         model_id,
