@@ -46,7 +46,7 @@ daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d7
 gpu_memory_utilization = 0.9  # Increase this value
 max_model_len = 5000
 model_id = "hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4"
-model, tokenizer = load_model(model_id, gpu_memory_utilization=gpu_memory_utilization, max_model_len=max_model_len))
+model, tokenizer = load_model(model_id, gpu_memory_utilization=gpu_memory_utilization, max_model_len=max_model_len)
 0  
 
 # Run vllM Server in background process
