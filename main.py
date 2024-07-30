@@ -51,7 +51,7 @@ model, tokenizer = load_model(model_id)
 def start_server():
     while True:
         process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model} --api-key {openai_api_key}",
+            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model, tokenizer} --api-key {openai_api_key}",
             shell=True
         )
         process.wait()  # Wait for the process to complete
