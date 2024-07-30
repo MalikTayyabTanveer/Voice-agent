@@ -44,16 +44,14 @@ openai_api_key = "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"
 daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d77"
 
 
-max_model_len = 54752
 model_id = "unsloth/Meta-Llama-3.1-8B-bnb-4bit"
-model, tokenizer = load_model(model_id, max_model_len=max_model_len)
-0  
+model, tokenizer = load_model(model_id)
 
 # Run vllM Server in background process
 def start_server():
     while True:
         process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model_id} --api-key {openai_api_key}",
+            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model} --api-key {openai_api_key}",
             shell=True
         )
         process.wait()  # Wait for the process to complete
