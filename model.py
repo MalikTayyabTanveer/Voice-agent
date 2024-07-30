@@ -1,17 +1,15 @@
 from awq import AutoAWQForCausalLM
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-def load_model(model_id, gpu_memory_utilization, max_model_len):
+def load_model(model_id,  max_model_len):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoAWQForCausalLM.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16,
-        low_cpu_mem_usage=True,
-        device_map="auto",
-    )
+    model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    load_in_4bit=True,
+    device_map='auto',  # Automatically places layers on the available devices
+)
     # Adjust GPU memory utilization if supported (this line is just a placeholder and needs actual implementation if supported by the library)
-    model.config.gpu_memory_utilization = gpu_memory_utilization
 
     # Set max sequence length
     model.config.max_length = max_model_len
