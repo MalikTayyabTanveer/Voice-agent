@@ -1,6 +1,7 @@
 from awq import AutoAWQForCausalLM
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
+import bitsandbytes as bnb
 
 def load_model(model_id,  max_model_len):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
