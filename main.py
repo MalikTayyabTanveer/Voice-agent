@@ -37,12 +37,11 @@ os.environ['SSL_CERT'] = ''
 os.environ['SSL_KEY'] = ''
 os.environ['OUTLINES_CACHE_DIR'] = '/tmp/.outlines'
 
-deepgram_voice: str = "aura-asteria-en"
+deepgram_voice = "aura-asteria-en"
 
-# Manually set API keys
+# Manually set API keys (ensure these are kept secure in a real application)
 openai_api_key = "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"
 daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d77"
-
 
 model_id = "unsloth/Meta-Llama-3.1-8B-bnb-4bit"
 model = load_model(model_id)
@@ -50,20 +49,33 @@ model = load_model(model_id)
 # Run vllM Server in background process
 def start_server():
     while True:
-        process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model} --api-key {openai_api_key}",
-            shell=True
-        )
-        process.wait()  # Wait for the process to complete
-        logger.error("Server process ended unexpectedly. Restarting in 5 seconds...")
-        time.sleep(7)  # Wait before restarting
+        try:
+            process = subprocess.Popen(
+                [
+                    "python",
+                    "-m",
+                    "vllm.entrypoints.openai.api_server",
+                    "--port",
+                    "5000",
+                    "--model",
+                    model,
+                    "--api-key",
+                    openai_api_key,
+                ],
+                shell=False,
+            )
+            process.wait()  # Wait for the process to complete
+            logger.error("Server process ended unexpectedly. Restarting in 5 seconds...")
+            time.sleep(7)  # Wait before restarting
+        except Exception as e:
+            logger.error(f"Failed to start server: {e}")
+            time.sleep(7)  # Wait before retrying
 
 # Start the server in a separate process
 server_process = Process(target=start_server, daemon=True)
 server_process.start()
 
 async def main(room_url: str, token: str):
-    
     async with aiohttp.ClientSession() as session:
         transport = DailyTransport(
             room_url,
@@ -175,15 +187,17 @@ def check_vllm_model_status():
     return False
 
 def start_bot(room_url: str, token: str = None):
-
     def target():
         asyncio.run(main(room_url, token))
 
-    check_vllm_model_status()
-    process = Process(target=target, daemon=True)
-    process.start()
-    process.join()  # Wait for the process to complete
-    return {"message": "session finished"}
+    if check_vllm_model_status():
+        process = Process(target=target, daemon=True)
+        process.start()
+        process.join()  # Wait for the process to complete
+        return {"message": "session finished"}
+    else:
+        logger.error("Failed to start bot: vllm model server not available.")
+        return {"message": "Failed to start bot: vllm model server not available.", "status_code": 500}
 
 def create_room():
     url = "https://api.daily.co/v1/rooms/"
@@ -193,8 +207,8 @@ def create_room():
     }
     data = {
         "properties": {
-            "exp": int(time.time()) + 60*5, ##5 mins
-            "eject_at_room_exp" : True
+            "exp": int(time.time()) + 60*5,  # 5 minutes
+            "eject_at_room_exp": True
         }
     }
 
