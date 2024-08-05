@@ -254,22 +254,7 @@ public_url = ngrok.connect(3000)  # Ensure this matches the port your applicatio
 print(f"Public URL: {public_url}")
 
 app = web.Application()
-cors = aiohttp_cors.setup(app)
-
-cors.add(app.router.add_post("/create_room", handle_create_room), {
-    "*": aiohttp_cors.ResourceOptions(
-        allow_credentials=True,
-        expose_headers="*",
-        allow_headers="*",
-    )
-})
-
-cors.add(app.router.add_post("/start_bot", handle_start_bot), {
-    "*": aiohttp_cors.ResourceOptions(
-        allow_credentials=True,
-        expose_headers="*",
-        allow_headers="*",
-    )
-})
+app.router.add_post('/create_room', handle_create_room)
+app.router.add_post('/start_bot', handle_start_bot)
 
 web.run_app(app, port=3000)
