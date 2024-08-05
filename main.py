@@ -1,3 +1,5 @@
+import aiohttp_cors
+from aiohttp import web
 import aiohttp
 import os
 import sys
@@ -21,14 +23,12 @@ from pipecat.frames.frames import LLMMessagesFrame, EndFrame
 from pipecat.processors.aggregators.llm_response import (
     LLMAssistantResponseAggregator, LLMUserResponseAggregator
 )
-
+from model import load_model
 from helpers import (
     ClearableDeepgramTTSService,
     AudioVolumeTimer,
     TranscriptionTimingLogger
 )
-from cerebrium import get_secret
-from huggingface_hub import login
 
 logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
@@ -39,18 +39,24 @@ os.environ['OUTLINES_CACHE_DIR'] = '/tmp/.outlines'
 
 deepgram_voice: str = "aura-asteria-en"
 
-login(token=get_secret('sec_1'))
+# Manually set API keys
+openai_api_key = "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"
+daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d77"
+
+
+model_id = "styalai/phi-2_quantize_gptq"
+#model = load_model(model_id)
+
 # Run vllM Server in background process
 def start_server():
     while True:
         process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model NousResearch/Meta-Llama-3-8B-Instruct --dtype bfloat16 --api-key {get_secret('sec_1')}",
+            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model_id} --api-key {openai_api_key}",
             shell=True
         )
         process.wait()  # Wait for the process to complete
         logger.error("Server process ended unexpectedly. Restarting in 5 seconds...")
         time.sleep(7)  # Wait before restarting
-
 
 # Start the server in a separate process
 server_process = Process(target=start_server, daemon=True)
@@ -87,12 +93,12 @@ async def main(room_url: str, token: str):
             voice=deepgram_voice,
             base_url="http://127.0.0.1:8082/v1/speak"
         )
-
+        
         llm = OpenAILLMService(
             name="LLM",
-            api_key=get_secret("sec_1"),
-            model="NousResearch/Meta-Llama-3-8B-Instruct",
-            base_url="http://127.0.0.1:5000/v1"
+            api_key=openai_api_key,
+            model=model_id,
+            base_url="http://127.0.0.1:5000/v1"  # Ensure this matches your server's URL
         )
 
         messages = [
@@ -128,21 +134,19 @@ async def main(room_url: str, token: str):
                 report_only_initial_ttfb=True
             ))
 
-        # When the first participant joins, the bot should introduce itself.
         @transport.event_handler("on_first_participant_joined")
         async def on_first_participant_joined(transport, participant):
             # Kick off the conversation.
             time.sleep(1.5)
             messages.append(
-                {"role": "system", "content": "Introduce yourself by saying 'hello, I'm FastBot, how can I help you today?'"})
+                {"role": "system", "content": "Introduce yourself by saying 'hello, I'm FastBot, how can I help you today?'"}
+            )
             await task.queue_frame(LLMMessagesFrame(messages))
 
-        # When the participant leaves, we exit the bot.
         @transport.event_handler("on_participant_left")
         async def on_participant_left(transport, participant, reason):
             await task.queue_frame(EndFrame())
 
-        # If the call is ended make sure we quit as well.
         @transport.event_handler("on_call_state_updated")
         async def on_call_state_updated(transport, state):
             if state == "left":
@@ -156,7 +160,7 @@ async def main(room_url: str, token: str):
 def check_vllm_model_status():
     url = "http://127.0.0.1:5000/v1/models"
     headers = {
-        "Authorization": f"Bearer {get_secret('sec_1')}"
+        "Authorization": f"Bearer {openai_api_key}"
     }
     max_retries = 8
     for _ in range(max_retries):
@@ -185,7 +189,7 @@ def create_room():
     url = "https://api.daily.co/v1/rooms/"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {get_secret('DAILY_T')}"
+        "Authorization": f"Bearer {daily_api_key}"
     }
     data = {
         "properties": {
@@ -216,7 +220,7 @@ def create_token(room_name: str):
     url = "https://api.daily.co/v1/meeting-tokens"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {get_secret('DAILY_T')}"
+        "Authorization": f"Bearer {daily_api_key}"
     }
     data = {
         "properties": {
@@ -231,4 +235,15 @@ def create_token(room_name: str):
     else:
         logger.error(f"Failed to create token: {response.status_code}")
         return None
+
+async def handle_create_room(request):
+    room_info = create_room()
+    return web.json_response(room_info)
+
+async def handle_start_bot(request):
+    request_data = await request.json()
+    room_url = request_data.get('room_url')
+    token = request_data.get('token')
+    start_bot(room_url, token)
+    return web.json_response({"message": "bot started"})
 
