@@ -24,7 +24,7 @@ from pipecat.frames.frames import LLMMessagesFrame, EndFrame
 from pipecat.processors.aggregators.llm_response import (
     LLMAssistantResponseAggregator, LLMUserResponseAggregator
 )
-from model import load_model
+#from model import load_model
 from helpers import (
     ClearableDeepgramTTSService,
     AudioVolumeTimer,
