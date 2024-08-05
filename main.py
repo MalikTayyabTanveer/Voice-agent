@@ -250,7 +250,7 @@ async def handle_start_bot(request):
 
 # Start Ngrok tunnel
 ngrok.set_auth_token("2jdvVAdEphPF3AHKCg0EZacvvFz_74RNcBcgW5AZYo96Fo7D1")
-public_url = ngrok.connect(8080)  # Ensure this matches the port your application listens on
+public_url = ngrok.connect(3000)  # Ensure this matches the port your application listens on
 print(f"Public URL: {public_url}")
 
 app = web.Application()
@@ -272,4 +272,4 @@ cors.add(app.router.add_post("/start_bot", handle_start_bot), {
     )
 })
 
-web.run_app(app, port=8080)
+web.run_app(app, port=3000)
