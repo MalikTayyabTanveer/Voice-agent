@@ -9,6 +9,7 @@ import requests
 import asyncio
 from multiprocessing import Process
 from loguru import logger
+from pyngrok import ngrok
 
 from pipecat.vad.vad_analyzer import VADParams
 from pipecat.vad.silero import SileroVADAnalyzer
@@ -247,3 +248,28 @@ async def handle_start_bot(request):
     start_bot(room_url, token)
     return web.json_response({"message": "bot started"})
 
+# Start Ngrok tunnel
+ngrok.set_auth_token("2jdvVAdEphPF3AHKCg0EZacvvFz_74RNcBcgW5AZYo96Fo7D1")
+public_url = ngrok.connect(8080)  # Ensure this matches the port your application listens on
+print(f"Public URL: {public_url}")
+
+app = web.Application()
+cors = aiohttp_cors.setup(app)
+
+cors.add(app.router.add_post("/create_room", handle_create_room), {
+    "*": aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*",
+    )
+})
+
+cors.add(app.router.add_post("/start_bot", handle_start_bot), {
+    "*": aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*",
+    )
+})
+
+web.run_app(app, port=8080)
