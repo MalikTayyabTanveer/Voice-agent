@@ -45,14 +45,14 @@ openai_api_key = "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"
 daily_api_key = "9929b1fef86091d59f4524358f970bc47328f17501d8fdf5052b6a9a9b046d77"
 
 
-model_id = "styalai/phi-2_quantize_gptq"
+#model_id = "styalai/phi-2_quantize_gptq"
 #model = load_model(model_id)
 
 # Run vllM Server in background process
 def start_server():
     while True:
         process = subprocess.Popen(
-            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model {model_id} --api-key {openai_api_key}",
+            f"python -m vllm.entrypoints.openai.api_server --port 5000 --model astronomer-io/Llama-3-8B-GPTQ-4-Bit --max-model-len 8192 --dtype float16 --api-key {openai_api_key}",
             shell=True
         )
         process.wait()  # Wait for the process to complete
